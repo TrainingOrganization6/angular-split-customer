@@ -59,13 +59,13 @@ import { getInputPositiveNumber, getInputBoolean, isUserSizesValid, getAreaMinSi
             <div *ngIf="last === true && _direction === 'horizontal'" 
             class="as-split-gutter-horizontal" 
             [hidden]="_isHidden"
-            [style.left.px]="_iPosition"
+            [style.left.px]="_iGutterPos"
             [style.width.px]="gutterSize"></div>
 
             <div *ngIf="last === true && _direction === 'vertical'" 
             class="as-split-gutter-vertical"
             [hidden]="_isHidden"
-            [style.top.px]="_iPosition"
+            [style.top.px]="_iGutterPos"
             [style.height.px]="gutterSize"></div>
 
         </ng-template>`,
@@ -74,7 +74,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
 
     // QuyenLS added Variable and Attribute Directives
     private _isHidden: true | false = true; // show and hide gutter visual
-    private _iGuterPos: number; // position gutter visual when dragging
+    private _iGutterPos: number; // position gutter visual when dragging
     private _iLeftPos: number;  // position mouse in div left
     private _iTopPos: number;  // position mouse in div top
 
@@ -540,10 +540,10 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
 
         ////
         if (this._direction === 'horizontal') {
-            this._iGuterPos = this.startPoint.x - this._iLeftPos;
+            this._iGutterPos = this.startPoint.x - this._iLeftPos;
         }
         else {
-            this._iGuterPos = this.startPoint.y - this._iTopPos;
+            this._iGutterPos = this.startPoint.y - this._iTopPos;
         }
 
         this.snapshot = {
@@ -628,10 +628,10 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
 
         // QuyenLS set position gutter visual
         if (this._direction === 'horizontal') {
-            this._iGuterPos = this.endPoint.x - this._iLeftPos;
+            this._iGutterPos = this.endPoint.x - this._iLeftPos;
         }
         else {
-            this._iGuterPos = this.endPoint.y - this._iTopPos;
+            this._iGutterPos = this.endPoint.y - this._iTopPos;
         }
 
 

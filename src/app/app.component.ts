@@ -15,7 +15,6 @@ export class AppComponent {
   @ViewChild('area2', { static: false }) area2: SplitAreaDirective;
   @ViewChild('area3', { static: false }) area3: SplitAreaDirective;
 
-  direction: string = 'horizontal'
   sizes = {
     percent: {
       area1: 30,

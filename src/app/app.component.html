@@ -1,5 +1,5 @@
 <div style="height: 500px; outline: #f9d676 dashed 5px; display: block; margin: 10px; padding: 10px">
-    <as-split unit="percent" [direction]="direction" (dragEnd)="dragEnd('percent', $event)" #split="asSplit" [refreshStyle]="false">
+    <as-split unit="percent" [direction]="'vertical'" (dragEnd)="dragEnd('percent', $event)" #split="asSplit" [refreshStyle]="false">
         <as-split-area size="30" #area1="asSplitArea">
             <h5>Initial size: <b>30%</b></h5>
             <h5>Current size: <b>{{ sizes.percent.area1 }}%</b></h5>
@@ -18,7 +18,7 @@
 </div>
 <br>
 <div style="height: 500px; outline: #064be0 dashed 5px; display: block">
-    <as-split unit="pixel" [direction]="direction" (dragEnd)="dragEnd('pixel', $event)">
+    <as-split unit="pixel" [direction]="'horizontal'" (dragEnd)="dragEnd('pixel', $event)" [refreshStyle]="true">
         <as-split-area size="120">
             <h5>Initial size: <b>120px</b></h5>
             <h5>Current size: <b>{{ sizes.pixel.area1 }}px</b></h5>
