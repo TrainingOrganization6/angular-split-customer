@@ -103,10 +103,10 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
     private transitionListener: Function;
     private readonly lockListeners: Array<Function> = [];
 
-    constructor(private ngZone: NgZone,
+    constructor(protected ngZone: NgZone,
                 public elRef: ElementRef,
-                private renderer: Renderer2,
-                private split: SplitComponent) {
+                protected renderer: Renderer2,
+                protected split: SplitComponent) {
         this.renderer.addClass(this.elRef.nativeElement, 'as-split-area');
     }
 

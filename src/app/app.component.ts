@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
-import { SplitComponent } from './component/split.component';
-import { SplitAreaDirective } from './directive/splitArea.directive';
+import { SplitComponent } from './library/component/split.component';
+import { SplitAreaDirective } from './library/directive/splitArea.directive';
 
 @Component({
   selector: 'app-root',

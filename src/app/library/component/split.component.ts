@@ -59,13 +59,13 @@ import { getInputPositiveNumber, getInputBoolean, isUserSizesValid, getAreaMinSi
             <div *ngIf="last === true && _direction === 'horizontal'" 
             class="as-split-gutter-horizontal" 
             [hidden]="_isHidden"
-            [style.left.px]="_iGutterPos"
+            [style.left.px]="_nGutterPos"
             [style.width.px]="gutterSize"></div>
 
             <div *ngIf="last === true && _direction === 'vertical'" 
             class="as-split-gutter-vertical"
             [hidden]="_isHidden"
-            [style.top.px]="_iGutterPos"
+            [style.top.px]="_nGutterPos"
             [style.height.px]="gutterSize"></div>
 
         </ng-template>`,
@@ -73,25 +73,25 @@ import { getInputPositiveNumber, getInputBoolean, isUserSizesValid, getAreaMinSi
 export class SplitComponent implements AfterViewInit, OnDestroy {
 
     // QuyenLS added Variable and Attribute Directives
-    private _isHidden: true | false = true; // show and hide gutter visual
-    private _iGutterPos: number; // position gutter visual when dragging
-    private _iLeftPos: number;  // position mouse in div left
-    private _iTopPos: number;  // position mouse in div top
+    // protected _isHidden: true | false = true; // show and hide gutter visual
+    // protected _nGutterPos: number; // position gutter visual when dragging
+    // protected _nLeftPos: number;  // position mouse in div left
+    // protected _nTopPos: number;  // position mouse in div top
 
-    private _isRefreshStyle: true | false = false;
+    // protected _isRefreshStyle: true | false = false;
 
-    // Attribute Directives set mode have refresh style document when dragging and not.
-    @Input() set refreshStyle(value: true | false) {
-        this._isRefreshStyle = value;
-    }
+    // // Attribute Directives set mode have refresh style document when dragging and not.
+    // @Input() set refreshStyle(value: true | false) {
+    //     this._isRefreshStyle = value;
+    // }
 
-    get refreshStyleDragging(): boolean{
-        return this._isRefreshStyle;
-    }
+    // get refreshStyleDragging(): boolean{
+    //     return this._isRefreshStyle;
+    // }
 
     ////
    
-    private _direction: 'horizontal' | 'vertical' = 'horizontal';
+    protected _direction: 'horizontal' | 'vertical' = 'horizontal';
 
     @Input() set direction(v: 'horizontal' | 'vertical') {
         this._direction = (v === 'vertical') ? 'vertical' : 'horizontal';
@@ -108,7 +108,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
     
     ////
 
-    private _unit: 'percent' | 'pixel' = 'percent';
+    protected _unit: 'percent' | 'pixel' = 'percent';
 
     @Input() set unit(v: 'percent' | 'pixel') {
         this._unit = (v === 'pixel') ? 'pixel' : 'percent';
@@ -125,7 +125,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
     
     ////
 
-    private _gutterSize: number = 4;
+    protected _gutterSize: number = 4;
 
     @Input() set gutterSize(v: number | null) {
         this._gutterSize = getInputPositiveNumber(v, 4);
@@ -139,7 +139,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
     
     ////
 
-    private _gutterStep: number = 1;
+    protected _gutterStep: number = 1;
 
     @Input() set gutterStep(v: number) {
         this._gutterStep = getInputPositiveNumber(v, 1);
@@ -151,7 +151,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
     
     ////
 
-    private _restrictMove: boolean = false;
+    protected _restrictMove: boolean = false;
 
     @Input() set restrictMove(v: boolean) {
         this._restrictMove = getInputBoolean(v);
@@ -163,7 +163,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
     
     ////
 
-    private _useTransition: boolean = false;
+    protected _useTransition: boolean = false;
 
     @Input() set useTransition(v: boolean) {
         this._useTransition = getInputBoolean(v);
@@ -178,7 +178,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
     
     ////
 
-    private _disabled: boolean = false;
+    protected _disabled: boolean = false;
     
     @Input() set disabled(v: boolean) {
         this._disabled = getInputBoolean(v);
@@ -193,7 +193,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
 
     ////
 
-    private _dir: 'ltr' | 'rtl' = 'ltr';
+    protected _dir: 'ltr' | 'rtl' = 'ltr';
     
     @Input() set dir(v: 'ltr' | 'rtl') {
         this._dir = (v === 'rtl') ? 'rtl' : 'ltr';
@@ -207,7 +207,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
     
     ////
 
-    private _gutterDblClickDuration: number = 0;
+    protected _gutterDblClickDuration: number = 0;
 
     @Input() set gutterDblClickDuration(v: number) {
         this._gutterDblClickDuration = getInputPositiveNumber(v, 0);
@@ -224,33 +224,33 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
     @Output() gutterClick = new EventEmitter<IOutputData>(false)
     @Output() gutterDblClick = new EventEmitter<IOutputData>(false)
 
-    private transitionEndSubscriber: Subscriber<IOutputAreaSizes>
+    protected transitionEndSubscriber: Subscriber<IOutputAreaSizes>
     @Output() get transitionEnd(): Observable<IOutputAreaSizes> {
         return new Observable(subscriber => this.transitionEndSubscriber = subscriber).pipe(
             debounceTime<IOutputAreaSizes>(20)
         );
     }
     
-    private dragProgressSubject: Subject<IOutputData> = new Subject();
+    protected dragProgressSubject: Subject<IOutputData> = new Subject();
     dragProgress$: Observable<IOutputData> = this.dragProgressSubject.asObservable();
 
     ////
 
-    private isDragging: boolean = false;
-    private dragListeners: Array<Function> = [];
-    private snapshot: ISplitSnapshot | null = null;
-    private startPoint: IPoint | null = null;
-    private endPoint: IPoint | null = null;
+    protected isDragging: boolean = false;
+    protected dragListeners: Array<Function> = [];
+    protected snapshot: ISplitSnapshot | null = null;
+    protected startPoint: IPoint | null = null;
+    protected endPoint: IPoint | null = null;
 
     public readonly displayedAreas: Array<IArea> = [];
-    private readonly hidedAreas: Array<IArea> = [];
+    protected readonly hidedAreas: Array<IArea> = [];
 
-    @ViewChildren('gutterEls') private gutterEls: QueryList<ElementRef>;
+    @ViewChildren('gutterEls') protected gutterEls: QueryList<ElementRef>;
 
-    constructor(private ngZone: NgZone,
-                private elRef: ElementRef,
-                private cdRef: ChangeDetectorRef,
-                private renderer: Renderer2) {
+    constructor(protected ngZone: NgZone,
+                protected elRef: ElementRef,
+                protected cdRef: ChangeDetectorRef,
+                protected renderer: Renderer2) {
         // To force adding default class, could be override by user @Input() or not
         this.direction = this._direction;
     }
@@ -262,7 +262,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
         });
     }
     
-    private getNbGutters(): number {
+    protected getNbGutters(): number {
         return (this.displayedAreas.length === 0) ? 0 : this.displayedAreas.length - 1;
     }
 
@@ -355,7 +355,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
         return true;
     }
 
-    private build(resetOrders: boolean, resetSizes: boolean): void {
+    protected build(resetOrders: boolean, resetSizes: boolean): void {
         this.stopDragging();
         // ¤ AREAS ORDER
         
@@ -443,7 +443,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
         this.cdRef.markForCheck();
     }
 
-    private refreshStyleSizes(): void {
+    protected refreshStyleSizes(): void {
         ///////////////////////////////////////////
         // PERCENT MODE
         if(this.unit === 'percent') {
@@ -500,7 +500,8 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
 
     public clickGutter(event: MouseEvent | TouchEvent, gutterNum: number): void {
         const tempPoint = getPointFromEvent(event);
-        this._isHidden = true;
+        // this._isHidden = true;
+
         // Be sure mouseup/touchend happened at same point as mousedown/touchstart to trigger click/dblclick
         if(this.startPoint && this.startPoint.x === tempPoint.x && this.startPoint.y === tempPoint.y) {
 
@@ -523,15 +524,15 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
     }
 
     
-
     public startDragging(event: MouseEvent | TouchEvent, gutterOrder: number, gutterNum: number): void {
         event.preventDefault();
         event.stopPropagation();
 
+        // console.log("start dragging");
         ////
-        this._isHidden = false;
-        this._iLeftPos = this.elRef.nativeElement.getBoundingClientRect().left;
-        this._iTopPos = this.elRef.nativeElement.getBoundingClientRect().top;
+        // this._isHidden = false;
+        // this._nLeftPos = this.elRef.nativeElement.getBoundingClientRect().left;
+        // this._nTopPos = this.elRef.nativeElement.getBoundingClientRect().top;
 
         this.startPoint = getPointFromEvent(event);
         if(this.startPoint === null || this.disabled === true) {
@@ -539,12 +540,12 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
         }
 
         ////
-        if (this._direction === 'horizontal') {
-            this._iGutterPos = this.startPoint.x - this._iLeftPos;
-        }
-        else {
-            this._iGutterPos = this.startPoint.y - this._iTopPos;
-        }
+        // if (this._direction === 'horizontal') {
+            // this._nGutterPos = this.startPoint.x - this._nLeftPos;
+        // }
+        // else {
+            // this._nGutterPos = this.startPoint.y - this._nTopPos;
+        // }
 
         this.snapshot = {
             gutterNum,
@@ -606,17 +607,16 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
     }
 
     //QuyenLS listener mouse move when dragging, change position gutter visual
-    @HostListener('mousemove', ['$event'])
-    private dragEvent(event: MouseEvent | TouchEvent): void {
+    // @HostListener('mousemove', ['$event'])
+    protected dragEvent(event: MouseEvent | TouchEvent): void {
         event.preventDefault();
-        event.stopPropagation();
+        // event.stopPropagation();
 
         if(this._clickTimeout !== null) {
             window.clearTimeout(this._clickTimeout);
             this._clickTimeout = null;
         }
          
-
         if(this.isDragging === false) {
             return;
         }
@@ -626,13 +626,14 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
             return;
         }
 
+        
         // QuyenLS set position gutter visual
-        if (this._direction === 'horizontal') {
-            this._iGutterPos = this.endPoint.x - this._iLeftPos;
-        }
-        else {
-            this._iGutterPos = this.endPoint.y - this._iTopPos;
-        }
+        // if (this._direction === 'horizontal') {
+        //     this._nGutterPos = this.endPoint.x - this._nLeftPos;
+        // }
+        // else {
+        //     this._nGutterPos = this.endPoint.y - this._nTopPos;
+        // }
 
 
         // Calculate steppedOffset
@@ -692,25 +693,25 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
         areasAfter.list.forEach(item => updateAreaSize(this.unit, item));
         
         // If isRefreshStyleDragging = true then refresh style document when dragging
-        if (this._isRefreshStyle) {
+        // if (this._isRefreshStyle) {
             this.refreshStyleSizes();
-        }
+        // }
 
         this.notify('progress', this.snapshot.gutterNum);
     }
 
-    private stopDragging(event?: Event): void {
+    protected stopDragging(event?: Event): void {
         if(event) {
             event.preventDefault();
             event.stopPropagation();
         }
         
-        this._isHidden = true;
+        // this._isHidden = true;
         
         // If isRefreshStyleDragging = false then refresh style document after drag.
-        if (!this._isRefreshStyle) {
-            this.refreshStyleSizes();
-        }  
+        // if (!this._isRefreshStyle) {
+        //     this.refreshStyleSizes();
+        // }  
     
         if(this.isDragging === false) {
             return;
