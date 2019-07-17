@@ -9,7 +9,7 @@ import { getInputPositiveNumber, getInputBoolean } from '../utils';
 })
 export class SplitAreaDirective implements OnInit, OnDestroy {
 
-    private _order: number | null = null;
+    protected _order: number | null = null;
 
     @Input() set order(v: number | null) {
         this._order = getInputPositiveNumber(v, null);
@@ -23,7 +23,7 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
 
     ////
 
-    private _size: number | null = null;
+    protected _size: number | null = null;
 
     @Input() set size(v: number | null) {
         this._size = getInputPositiveNumber(v, null);
@@ -37,7 +37,7 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
 
     ////
 
-    private _minSize: number | null = null;
+    protected _minSize: number | null = null;
 
     @Input() set minSize(v: number | null) {
         this._minSize = getInputPositiveNumber(v, null);
@@ -51,7 +51,7 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
 
     ////
 
-    private _maxSize: number | null = null;
+    protected _maxSize: number | null = null;
 
     @Input() set maxSize(v: number | null) {
         this._maxSize = getInputPositiveNumber(v, null);
@@ -65,7 +65,7 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
 
     ////
 
-    private _lockSize: boolean = false;
+    protected _lockSize: boolean = false;
 
     @Input() set lockSize(v: boolean) {
         this._lockSize = getInputBoolean(v);
@@ -79,7 +79,7 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
 
     ////
 
-    private _visible: boolean = true;
+    protected _visible: boolean = true;
 
     @Input() set visible(v: boolean) {
         this._visible = getInputBoolean(v);
@@ -100,8 +100,8 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
 
     ////
 
-    private transitionListener: Function;
-    private readonly lockListeners: Array<Function> = [];
+    protected transitionListener: Function;
+    protected readonly lockListeners: Array<Function> = [];
 
     constructor(protected ngZone: NgZone,
                 public elRef: ElementRef,

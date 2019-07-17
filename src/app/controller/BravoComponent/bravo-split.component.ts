@@ -1,13 +1,12 @@
-import { Component, OnInit, NgZone, ElementRef, Renderer2, ChangeDetectorRef, Input, HostListener, ChangeDetectionStrategy } from '@angular/core';
-import { getInputPositiveNumber, getInputBoolean, isUserSizesValid, getAreaMinSize, getAreaMaxSize, getPointFromEvent, getElementPixelSize, getGutterSideAbsorptionCapacity, updateAreaSize } from '../../library/utils';
-import { IArea, IPoint, ISplitSnapshot, IAreaSnapshot, IOutputData, IOutputAreaSizes } from '../../library/interface';
-import { SplitComponent } from './../../library/component/split.component';
-
+import { Component, NgZone, ElementRef, Renderer2, ChangeDetectorRef, Input, HostListener} from '@angular/core';
+import { getPointFromEvent, getElementPixelSize, getGutterSideAbsorptionCapacity, updateAreaSize } from '../../library/utils';
+import { IAreaSnapshot } from '../../library/interface';
+import { SplitComponent } from '../../library/component/split.component';
 
 @Component({
   selector: 'bravo-split, [bravo-split]',
   exportAs: 'bravosplit',
-  styleUrls: ['../../library/component/split.component.scss'],
+  styleUrls: ['./bravo-split.component.scss'],
   template: `
         <ng-content></ng-content>
         <ng-template ngFor [ngForOf]="displayedAreas" let-index="index" let-last="last">
@@ -38,21 +37,14 @@ import { SplitComponent } from './../../library/component/split.component';
         </ng-template>`,
 })
 
-export class BravoSplitComponent extends SplitComponent {
-
-  constructor(protected ngZone: NgZone,
-    protected elRef: ElementRef,
-    protected cdRef: ChangeDetectorRef,
-    protected renderer: Renderer2) {
-
-    super(ngZone, elRef, cdRef, renderer);
-  }
+export class BravoSplitComponent extends SplitComponent{
 
   private _isHidden: true | false = true; // show and hide gutter visual
   private _nGutterPos: number; // position gutter visual when dragging
-  private _nLeftPos: number;  // position mouse in div left
-  private _nTopPos: number;  // position mouse in div top
+  private _nLeftPos: number;  // position mouse in div margin left
+  private _nTopPos: number;  // position mouse in div margin top
 
+  // set refresh style panel when dragging or not, default false.
   private _isRefreshStyle: true | false = false;
 
   @Input() set refreshStyle(value: true | false) {
@@ -63,11 +55,24 @@ export class BravoSplitComponent extends SplitComponent {
     return this._isRefreshStyle;
   }
 
+  constructor(protected ngZone: NgZone,
+    protected elRef: ElementRef,
+    protected cdRef: ChangeDetectorRef,
+    protected renderer: Renderer2) {
+
+    super(ngZone, elRef, cdRef, renderer);
+  }
+
+  public ngAfterViewInit() {
+    this.build(true, true);
+  }
+
+    // Set gutter size;
+    _gutterSize = 2;
 
   public clickGutter(event: MouseEvent | TouchEvent, gutterNum: number): void {
     const tempPoint = getPointFromEvent(event);
     this._isHidden = true;
-    console.log("click gutter");
 
     // Be sure mouseup/touchend happened at same point as mousedown/touchstart to trigger click/dblclick
     if (this.startPoint && this.startPoint.x === tempPoint.x && this.startPoint.y === tempPoint.y) {
@@ -92,8 +97,7 @@ export class BravoSplitComponent extends SplitComponent {
 
   public startDragging(event: MouseEvent | TouchEvent, gutterOrder: number, gutterNum: number): void {
     event.preventDefault();
-    // event.stopPropagation();
-
+    event.stopPropagation();
 
     ////
     this._isHidden = false;
@@ -176,7 +180,6 @@ export class BravoSplitComponent extends SplitComponent {
   @HostListener('mousemove', ['$event'])
   protected dragEvent(event: MouseEvent | TouchEvent): void {
     event.preventDefault();
-    // event.stopPropagation();
 
     if (this._clickTimeout !== null) {
       window.clearTimeout(this._clickTimeout);
@@ -192,8 +195,6 @@ export class BravoSplitComponent extends SplitComponent {
       return;
     }
 
-
-
     // QuyenLS set position gutter visual
     if (this._direction === 'horizontal') {
       this._nGutterPos = this.endPoint.x - this._nLeftPos;
@@ -201,7 +202,6 @@ export class BravoSplitComponent extends SplitComponent {
     else {
       this._nGutterPos = this.endPoint.y - this._nTopPos;
     }
-
 
     // Calculate steppedOffset
 
@@ -260,9 +260,9 @@ export class BravoSplitComponent extends SplitComponent {
     areasAfter.list.forEach(item => updateAreaSize(this.unit, item));
 
     // If isRefreshStyleDragging = true then refresh style document when dragging
-    // if (this._isRefreshStyle) {
-    // this.refreshStyleSizes();
-    // }
+    if (this._isRefreshStyle) {
+    this.refreshStyleSizes();
+    }
 
     this.notify('progress', this.snapshot.gutterNum);
   }

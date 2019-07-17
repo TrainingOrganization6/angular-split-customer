@@ -1,4 +1,4 @@
-import { Component, Input, Output, ChangeDetectionStrategy, ChangeDetectorRef, Renderer2, AfterViewInit, OnDestroy, ElementRef, NgZone, ViewChildren, QueryList, EventEmitter, HostListener } from '@angular/core';
+import { Component, Input, Output, ChangeDetectionStrategy, ChangeDetectorRef, Renderer2, AfterViewInit, OnDestroy, ElementRef, NgZone, ViewChildren, QueryList, EventEmitter } from '@angular/core';
 import { Observable, Subscriber, Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
@@ -44,53 +44,21 @@ import { getInputPositiveNumber, getInputBoolean, isUserSizesValid, getAreaMinSi
     template: `
         <ng-content></ng-content>
         <ng-template ngFor [ngForOf]="displayedAreas" let-index="index" let-last="last">
-            <div  
-                #gutterEls *ngIf="last === false"
-                class="as-split-gutter"
-                [style.flex-basis.px]="gutterSize"
-                [style.order]="index*2+1"
-                (mousedown)="startDragging($event, index*2+1, index+1)"
-                (touchstart)="startDragging($event, index*2+1, index+1)"
-                (mouseup)="clickGutter($event, index+1)"
-                (touchend)="clickGutter($event, index+1)">  
-                    <div class="as-split-gutter-icon"></div>
+            <div *ngIf="last === false" 
+                 #gutterEls
+                 class="as-split-gutter"
+                 [style.flex-basis.px]="gutterSize"
+                 [style.order]="index*2+1"
+                 (mousedown)="startDragging($event, index*2+1, index+1)"
+                 (touchstart)="startDragging($event, index*2+1, index+1)"
+                 (mouseup)="clickGutter($event, index+1)"
+                 (touchend)="clickGutter($event, index+1)">
+                <div class="as-split-gutter-icon"></div>
             </div>
-
-            <div *ngIf="last === true && _direction === 'horizontal'" 
-            class="as-split-gutter-horizontal" 
-            [hidden]="_isHidden"
-            [style.left.px]="_nGutterPos"
-            [style.width.px]="gutterSize"></div>
-
-            <div *ngIf="last === true && _direction === 'vertical'" 
-            class="as-split-gutter-vertical"
-            [hidden]="_isHidden"
-            [style.top.px]="_nGutterPos"
-            [style.height.px]="gutterSize"></div>
-
         </ng-template>`,
 })
 export class SplitComponent implements AfterViewInit, OnDestroy {
 
-    // QuyenLS added Variable and Attribute Directives
-    // protected _isHidden: true | false = true; // show and hide gutter visual
-    // protected _nGutterPos: number; // position gutter visual when dragging
-    // protected _nLeftPos: number;  // position mouse in div left
-    // protected _nTopPos: number;  // position mouse in div top
-
-    // protected _isRefreshStyle: true | false = false;
-
-    // // Attribute Directives set mode have refresh style document when dragging and not.
-    // @Input() set refreshStyle(value: true | false) {
-    //     this._isRefreshStyle = value;
-    // }
-
-    // get refreshStyleDragging(): boolean{
-    //     return this._isRefreshStyle;
-    // }
-
-    ////
-   
     protected _direction: 'horizontal' | 'vertical' = 'horizontal';
 
     @Input() set direction(v: 'horizontal' | 'vertical') {
@@ -125,10 +93,10 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
     
     ////
 
-    protected _gutterSize: number = 4;
+    protected _gutterSize: number = 11;
 
     @Input() set gutterSize(v: number | null) {
-        this._gutterSize = getInputPositiveNumber(v, 4);
+        this._gutterSize = getInputPositiveNumber(v, 11);
 
         this.build(false, false);
     }
@@ -357,6 +325,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
 
     protected build(resetOrders: boolean, resetSizes: boolean): void {
         this.stopDragging();
+
         // ¤ AREAS ORDER
         
         if(resetOrders === true) {
@@ -439,6 +408,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
                 }
             }
         }
+
         this.refreshStyleSizes();
         this.cdRef.markForCheck();
     }
@@ -454,14 +424,14 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
             // Multiple areas > use each percent basis
             else {
                 const sumGutterSize = this.getNbGutters() * this.gutterSize;
-                    this.displayedAreas.forEach((area, index) => {
-                        area.component.setStyleFlex(
-                            0, 0, `calc( ${ area.size }% - ${ <number> area.size / 100 * sumGutterSize }px )`,
-                            (area.minSize !== null && area.minSize === area.size) ? true : false,
-                            (area.maxSize !== null && area.maxSize === area.size) ? true : false,
-                        );
-                            
-                    });
+                
+                this.displayedAreas.forEach(area => {
+                    area.component.setStyleFlex(
+                        0, 0, `calc( ${ area.size }% - ${ <number> area.size / 100 * sumGutterSize }px )`,
+                        (area.minSize !== null && area.minSize === area.size) ? true : false,
+                        (area.maxSize !== null && area.maxSize === area.size) ? true : false,
+                    );
+                });
             } 
         }
         ///////////////////////////////////////////
@@ -500,7 +470,6 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
 
     public clickGutter(event: MouseEvent | TouchEvent, gutterNum: number): void {
         const tempPoint = getPointFromEvent(event);
-        // this._isHidden = true;
 
         // Be sure mouseup/touchend happened at same point as mousedown/touchstart to trigger click/dblclick
         if(this.startPoint && this.startPoint.x === tempPoint.x && this.startPoint.y === tempPoint.y) {
@@ -523,29 +492,14 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
         }
     }
 
-    
     public startDragging(event: MouseEvent | TouchEvent, gutterOrder: number, gutterNum: number): void {
         event.preventDefault();
         event.stopPropagation();
-
-        // console.log("start dragging");
-        ////
-        // this._isHidden = false;
-        // this._nLeftPos = this.elRef.nativeElement.getBoundingClientRect().left;
-        // this._nTopPos = this.elRef.nativeElement.getBoundingClientRect().top;
 
         this.startPoint = getPointFromEvent(event);
         if(this.startPoint === null || this.disabled === true) {
             return;
         }
-
-        ////
-        // if (this._direction === 'horizontal') {
-            // this._nGutterPos = this.startPoint.x - this._nLeftPos;
-        // }
-        // else {
-            // this._nGutterPos = this.startPoint.y - this._nTopPos;
-        // }
 
         this.snapshot = {
             gutterNum,
@@ -599,24 +553,21 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
         this.displayedAreas.forEach(area => area.component.lockEvents());
 
         this.isDragging = true;
-
         this.renderer.addClass(this.elRef.nativeElement, 'as-dragging');
         this.renderer.addClass(this.gutterEls.toArray()[this.snapshot.gutterNum - 1].nativeElement, 'as-dragged');
         
         this.notify('start', this.snapshot.gutterNum);
     }
 
-    //QuyenLS listener mouse move when dragging, change position gutter visual
-    // @HostListener('mousemove', ['$event'])
     protected dragEvent(event: MouseEvent | TouchEvent): void {
         event.preventDefault();
-        // event.stopPropagation();
+        event.stopPropagation();
 
         if(this._clickTimeout !== null) {
             window.clearTimeout(this._clickTimeout);
             this._clickTimeout = null;
         }
-         
+
         if(this.isDragging === false) {
             return;
         }
@@ -626,23 +577,12 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
             return;
         }
 
-        
-        // QuyenLS set position gutter visual
-        // if (this._direction === 'horizontal') {
-        //     this._nGutterPos = this.endPoint.x - this._nLeftPos;
-        // }
-        // else {
-        //     this._nGutterPos = this.endPoint.y - this._nTopPos;
-        // }
-
-
         // Calculate steppedOffset
 
         let offset = (this.direction === 'horizontal') ? (this.startPoint.x - this.endPoint.x) : (this.startPoint.y - this.endPoint.y);
         if(this.dir === 'rtl') {
             offset = -offset;
         }
-
         const steppedOffset = Math.round(offset / this.gutterStep) * this.gutterStep;
         
         if(steppedOffset === this.snapshot.lastSteppedOffset) {
@@ -692,11 +632,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
         areasBefore.list.forEach(item => updateAreaSize(this.unit, item));
         areasAfter.list.forEach(item => updateAreaSize(this.unit, item));
         
-        // If isRefreshStyleDragging = true then refresh style document when dragging
-        // if (this._isRefreshStyle) {
-            this.refreshStyleSizes();
-        // }
-
+        this.refreshStyleSizes();
         this.notify('progress', this.snapshot.gutterNum);
     }
 
@@ -706,13 +642,6 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
             event.stopPropagation();
         }
         
-        // this._isHidden = true;
-        
-        // If isRefreshStyleDragging = false then refresh style document after drag.
-        // if (!this._isRefreshStyle) {
-        //     this.refreshStyleSizes();
-        // }  
-    
         if(this.isDragging === false) {
             return;
         }
