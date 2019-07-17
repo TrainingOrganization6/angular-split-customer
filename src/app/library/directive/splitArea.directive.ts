@@ -16,7 +16,7 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
 
         this.split.updateArea(this, true, false);
     }
-    
+
     get order(): number | null {
         return this._order;
     }
@@ -30,7 +30,7 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
 
         this.split.updateArea(this, false, true);
     }
-    
+
     get size(): number | null {
         return this._size;
     }
@@ -44,7 +44,7 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
 
         this.split.updateArea(this, false, true);
     }
-    
+
     get minSize(): number | null {
         return this._minSize;
     }
@@ -58,7 +58,7 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
 
         this.split.updateArea(this, false, true);
     }
-    
+
     get maxSize(): number | null {
         return this._maxSize;
     }
@@ -72,7 +72,7 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
 
         this.split.updateArea(this, false, true);
     }
-    
+
     get lockSize(): boolean {
         return this._lockSize;
     }
@@ -84,7 +84,7 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
     @Input() set visible(v: boolean) {
         this._visible = getInputBoolean(v);
 
-        if(this._visible) { 
+        if (this._visible) {
             this.split.showArea(this);
             this.renderer.removeClass(this.elRef.nativeElement, 'as-hidden');
         }
@@ -104,9 +104,9 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
     protected readonly lockListeners: Array<Function> = [];
 
     constructor(protected ngZone: NgZone,
-                public elRef: ElementRef,
-                protected renderer: Renderer2,
-                protected split: SplitComponent) {
+        public elRef: ElementRef,
+        protected renderer: Renderer2,
+        protected split: SplitComponent) {
         this.renderer.addClass(this.elRef.nativeElement, 'as-split-area');
     }
 
@@ -116,7 +116,7 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
         this.ngZone.runOutsideAngular(() => {
             this.transitionListener = this.renderer.listen(this.elRef.nativeElement, 'transitionend', (event: TransitionEvent) => {
                 // Limit only flex-basis transition to trigger the event
-                if(event.propertyName === 'flex-basis') {
+                if (event.propertyName === 'flex-basis') {
                     this.split.notify('transitionEnd', -1);
                 }
             });
@@ -126,38 +126,38 @@ export class SplitAreaDirective implements OnInit, OnDestroy {
     public setStyleOrder(value: number): void {
         this.renderer.setStyle(this.elRef.nativeElement, 'order', value);
     }
-    
+
     public setStyleFlex(grow: number, shrink: number, basis: string, isMin: boolean, isMax: boolean): void {
         // Need 3 separated properties to work on IE11 (https://github.com/angular/flex-layout/issues/323)
         this.renderer.setStyle(this.elRef.nativeElement, 'flex-grow', grow);
         this.renderer.setStyle(this.elRef.nativeElement, 'flex-shrink', shrink);
         this.renderer.setStyle(this.elRef.nativeElement, 'flex-basis', basis);
-        
-        if(isMin === true)  this.renderer.addClass(this.elRef.nativeElement, 'as-min');
-        else                this.renderer.removeClass(this.elRef.nativeElement, 'as-min');
-        
-        if(isMax === true)  this.renderer.addClass(this.elRef.nativeElement, 'as-max');
-        else                this.renderer.removeClass(this.elRef.nativeElement, 'as-max');
+
+        if (isMin === true) this.renderer.addClass(this.elRef.nativeElement, 'as-min');
+        else this.renderer.removeClass(this.elRef.nativeElement, 'as-min');
+
+        if (isMax === true) this.renderer.addClass(this.elRef.nativeElement, 'as-max');
+        else this.renderer.removeClass(this.elRef.nativeElement, 'as-max');
     }
-    
+
     public lockEvents(): void {
         this.ngZone.runOutsideAngular(() => {
-            this.lockListeners.push( this.renderer.listen(this.elRef.nativeElement, 'selectstart', (e: Event) => false) );
-            this.lockListeners.push( this.renderer.listen(this.elRef.nativeElement, 'dragstart', (e: Event) => false) );
+            this.lockListeners.push(this.renderer.listen(this.elRef.nativeElement, 'selectstart', (e: Event) => false));
+            this.lockListeners.push(this.renderer.listen(this.elRef.nativeElement, 'dragstart', (e: Event) => false));
         });
     }
 
     public unlockEvents(): void {
-        while(this.lockListeners.length > 0) {
+        while (this.lockListeners.length > 0) {
             const fct = this.lockListeners.pop();
-            if(fct) fct();
+            if (fct) fct();
         }
     }
 
     public ngOnDestroy(): void {
         this.unlockEvents();
 
-        if(this.transitionListener) {
+        if (this.transitionListener) {
             this.transitionListener();
         }
 

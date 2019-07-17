@@ -9,11 +9,11 @@ import { BravoSplitComponent } from './BravoComponent/bravo-split.component';
 export class BravoAreaDirective extends SplitAreaDirective {
 
   constructor(protected ngZone: NgZone,
-      public elRef: ElementRef,
-      protected renderer: Renderer2,
-      protected split: BravoSplitComponent) {
+    public elRef: ElementRef,
+    protected renderer: Renderer2,
+    protected split: BravoSplitComponent) {
 
-      super(ngZone, elRef, renderer, split);
-   }
+    super(ngZone, elRef, renderer, split);
+  }
 
 }

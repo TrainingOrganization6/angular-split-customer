@@ -1,4 +1,4 @@
-import { Component, NgZone, ElementRef, Renderer2, ChangeDetectorRef, Input, HostListener} from '@angular/core';
+import { Component, NgZone, ElementRef, Renderer2, ChangeDetectorRef, Input, HostListener } from '@angular/core';
 import { getPointFromEvent, getElementPixelSize, getGutterSideAbsorptionCapacity, updateAreaSize } from '../../library/utils';
 import { IAreaSnapshot } from '../../library/interface';
 import { SplitComponent } from '../../library/component/split.component';
@@ -37,7 +37,7 @@ import { SplitComponent } from '../../library/component/split.component';
         </ng-template>`,
 })
 
-export class BravoSplitComponent extends SplitComponent{
+export class BravoSplitComponent extends SplitComponent {
 
   private _isHidden: true | false = true; // show and hide gutter visual
   private _nGutterPos: number; // position gutter visual when dragging
@@ -67,8 +67,8 @@ export class BravoSplitComponent extends SplitComponent{
     this.build(true, true);
   }
 
-    // Set gutter size;
-    _gutterSize = 2;
+  // Set gutter size;
+  _gutterSize = 2;
 
   public clickGutter(event: MouseEvent | TouchEvent, gutterNum: number): void {
     const tempPoint = getPointFromEvent(event);
@@ -261,7 +261,7 @@ export class BravoSplitComponent extends SplitComponent{
 
     // If isRefreshStyleDragging = true then refresh style document when dragging
     if (this._isRefreshStyle) {
-    this.refreshStyleSizes();
+      this.refreshStyleSizes();
     }
 
     this.notify('progress', this.snapshot.gutterNum);
