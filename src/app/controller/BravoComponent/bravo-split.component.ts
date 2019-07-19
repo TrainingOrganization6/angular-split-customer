@@ -39,7 +39,7 @@ import { SplitComponent } from '../../library/component/split.component';
 
 export class BravoSplitComponent extends SplitComponent {
 
-  private _isHidden: true | false = true; // show and hide gutter visual
+  private _bIsHidden: true | false = true; // show and hide gutter visual
   private _nGutterPos: number; // position gutter visual when dragging
   private _nLeftPos: number;  // position mouse in div margin left
   private _nTopPos: number;  // position mouse in div margin top
@@ -72,7 +72,7 @@ export class BravoSplitComponent extends SplitComponent {
 
   public clickGutter(event: MouseEvent | TouchEvent, gutterNum: number): void {
     const tempPoint = getPointFromEvent(event);
-    this._isHidden = true;
+    this._bIsHidden = true;
 
     // Be sure mouseup/touchend happened at same point as mousedown/touchstart to trigger click/dblclick
     if (this.startPoint && this.startPoint.x === tempPoint.x && this.startPoint.y === tempPoint.y) {
@@ -100,7 +100,7 @@ export class BravoSplitComponent extends SplitComponent {
     event.stopPropagation();
 
     ////
-    this._isHidden = false;
+    this._bIsHidden = false;
     this._nLeftPos = this.elRef.nativeElement.getBoundingClientRect().left;
     this._nTopPos = this.elRef.nativeElement.getBoundingClientRect().top;
 
@@ -273,7 +273,7 @@ export class BravoSplitComponent extends SplitComponent {
       event.stopPropagation();
     }
 
-    this._isHidden = true;
+    this._bIsHidden = true;
 
     // If isRefreshStyleDragging = false then refresh style document after drag.
     if (!this._isRefreshStyle) {
