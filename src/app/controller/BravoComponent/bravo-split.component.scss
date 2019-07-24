@@ -10,8 +10,8 @@
     &>.as-split-gutter {
         flex-grow: 0;
         flex-shrink: 0;
-        background-color: #1e45b1;
-        display: block;
+        // background-color: #1e45b1;
+        display: flex;
         align-items: center;
         justify-content: center;
         &>.as-split-gutter-icon {
@@ -83,14 +83,18 @@
     // QuyenLS add style for split-gutter visual
     &>.as-split-gutter-horizontal {
         height: 100%;
-        background-color: brown;
         position: absolute;
         cursor: col-resize;
+        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==");
+        background-position: center center;
+        background-repeat: repeat;
     }
     &>.as-split-gutter-vertical {
-        background-color: brown;
         width: 100%;
         position: absolute;
         cursor: row-resize;
+        background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFCAMAAABl/6zIAAAABlBMVEUAAADMzMzIT8AyAAAAAXRSTlMAQObYZgAAABRJREFUeAFjYGRkwIMJSeMHlBkOABP7AEGzSuPKAAAAAElFTkSuQmCC");
+        background-position: center center;
+        background-repeat: repeat;
     }
 }
