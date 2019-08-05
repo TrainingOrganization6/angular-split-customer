@@ -562,7 +562,7 @@ export class SplitComponent implements AfterViewInit, OnDestroy {
     protected dragEvent(event: MouseEvent | TouchEvent): void {
         event.preventDefault();
         event.stopPropagation();
-
+        console.log("dragEvent")
         if (this._clickTimeout !== null) {
             window.clearTimeout(this._clickTimeout);
             this._clickTimeout = null;

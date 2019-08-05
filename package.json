@@ -21,6 +21,7 @@
     "@angular/router": "~8.0.0",
     "rxjs": "~6.4.0",
     "tslib": "^1.9.0",
+    "wijmo": "^5.20192.624",
     "zone.js": "~0.9.1"
   },
   "devDependencies": {

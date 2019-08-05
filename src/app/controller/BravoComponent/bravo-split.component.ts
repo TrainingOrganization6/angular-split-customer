@@ -1,6 +1,6 @@
 import { Component, NgZone, ElementRef, Renderer2, ChangeDetectorRef, Input, HostListener, OnInit } from '@angular/core';
 import { getPointFromEvent, getElementPixelSize, getGutterSideAbsorptionCapacity, updateAreaSize } from '../../library/utils';
-import { IAreaSnapshot, IOutputAreaSizes } from '../../library/interface';
+import { IAreaSnapshot, IOutputAreaSizes, IPoint } from '../../library/interface';
 import { SplitComponent } from '../../library/component/split.component';
 import { BravoAreaDirective } from '../bravo-area.directive';
 import { areAllEquivalent } from '@angular/compiler/src/output/output_ast';
@@ -93,7 +93,7 @@ export class BravoSplitComponent extends SplitComponent {
     if (this._direction === 'horizontal') {
       if (!isNullOrUndefined(_nIdxAreaAuto)) {
         _areaSizes[_nIdxAreaAuto] = (this.elRef.nativeElement.offsetWidth)
-        - _nTotalSize - (this._gutterSize * (_areaSizes.length - 1));
+          - _nTotalSize - (this._gutterSize * (_areaSizes.length - 1));
       }
     }
     else {
@@ -104,8 +104,8 @@ export class BravoSplitComponent extends SplitComponent {
     }
     this.setNewAreaSize(_currentOutputAreaSizes, _nIndexArea, _areaSizes);
 
-    if(!isNullOrUndefined(_nIdxAreaAuto)) {
-        _currentOutputAreaSizes[_nIdxAreaAuto] = "*";
+    if (!isNullOrUndefined(_nIdxAreaAuto)) {
+      _currentOutputAreaSizes[_nIdxAreaAuto] = "*";
     }
 
     this.setVisibleAreaSizes(_currentOutputAreaSizes);
@@ -128,12 +128,12 @@ export class BravoSplitComponent extends SplitComponent {
         if (isNaN(_nDefaultSizeElPre)) {
           if (_pAreaSizes[_pnIndexArea] === _nDefaultSizeElCur) {
             _currentOutputAreaSizes[_pnIndexArea] = _pAreaSizes[_pnIndexArea] + _pAreaSizes[_pnIndexArea - 1];
-          return;
+            return;
           }
 
           if (_pAreaSizes[_pnIndexArea - 1] === 0) {
             _currentOutputAreaSizes[_pnIndexArea] = this._defaultAreaSizes[_pnIndexArea];
-          return;
+            return;
           }
 
           if (_pAreaSizes[_pnIndexArea] !== 0) {
@@ -161,7 +161,7 @@ export class BravoSplitComponent extends SplitComponent {
     // direction = vertical
     else {
       if (isNaN(_nDefaultSizeElCur)) {
-        
+
         if (_pAreaSizes[_pnIndexArea] === 0) {
           _currentOutputAreaSizes[_pnIndexArea - 1] = this._defaultAreaSizes[_pnIndexArea - 1];
         }
@@ -208,9 +208,7 @@ export class BravoSplitComponent extends SplitComponent {
 
 
   public clickGutter(event: MouseEvent | TouchEvent, gutterNum: number): void {
-    event.preventDefault();
     const tempPoint = getPointFromEvent(event);
-    this._bIsHidden = true;
 
     // Be sure mouseup/touchend happened at same point as mousedown/touchstart to trigger click/dblclick
     if (this.startPoint && this.startPoint.x === tempPoint.x && this.startPoint.y === tempPoint.y) {
@@ -236,10 +234,9 @@ export class BravoSplitComponent extends SplitComponent {
   public startDragging(event: MouseEvent | TouchEvent, gutterOrder: number, gutterNum: number): void {
     event.preventDefault();
     event.stopPropagation();
-    ////
-    this._nGutterOrder = gutterOrder;
-    this._bIsHidden = false;
 
+    //
+    this._nGutterOrder = gutterOrder;
     this._nLeftPos = this.elRef.nativeElement.getBoundingClientRect().left;
     this._nTopPos = this.elRef.nativeElement.getBoundingClientRect().top;
 
@@ -255,6 +252,8 @@ export class BravoSplitComponent extends SplitComponent {
     else {
       this._nGutterPos = this.startPoint.y - this._nTopPos;
     }
+
+    this._bIsHidden = false;
 
     this.snapshot = {
       gutterNum,
@@ -315,97 +314,108 @@ export class BravoSplitComponent extends SplitComponent {
     this.notify('start', this.snapshot.gutterNum);
   }
 
-  //QuyenLS listener mouse move when dragging, change position gutter visual
+  //Date 05/08/19: fix bug block dragging column in flex grid.
+  //Add new method setPositionGutter
   @HostListener('mousemove', ['$event'])
+  protected setPositionGutter() {
+    if (this.endPoint === null) {
+      return;
+    }
+
+    if (this._direction === 'horizontal') {
+      this._nGutterPos = this.endPoint.x - this._nLeftPos;
+    }
+    else {
+      this._nGutterPos = this.endPoint.y - this._nTopPos;
+    }
+  }
+
+  //QuyenLS listener mouse move when dragging, change position gutter visual
+  //Date 05/08/19: fix bug block dragging column in flex grid.
+  //Remove @HostListener('mousemove', ['$event'])
   protected dragEvent(event: MouseEvent | TouchEvent): void {
     event.preventDefault();
 
-    if (!this._bIsHidden) {
-      if (this._clickTimeout !== null) {
-        window.clearTimeout(this._clickTimeout);
-        this._clickTimeout = null;
+    if (this._clickTimeout !== null) {
+      window.clearTimeout(this._clickTimeout);
+      this._clickTimeout = null;
+    }
+
+    if (this.isDragging === false) {
+      return;
+    }
+
+    this.endPoint = getPointFromEvent(event);
+    if (this.endPoint === null) {
+      return;
+    }
+
+    // QuyenLS set position gutter visual
+    this.setPositionGutter();
+
+    // Calculate steppedOffset
+
+    let offset = (this.direction === 'horizontal') ? (this.startPoint.x - this.endPoint.x) : (this.startPoint.y - this.endPoint.y);
+    if (this.dir === 'rtl') {
+      offset = -offset;
+    }
+
+    const steppedOffset = Math.round(offset / this.gutterStep) * this.gutterStep;
+
+    if (steppedOffset === this.snapshot.lastSteppedOffset) {
+      return;
+    }
+
+    this.snapshot.lastSteppedOffset = steppedOffset;
+
+    // Need to know if each gutter side areas could reacts to steppedOffset
+
+    let areasBefore = getGutterSideAbsorptionCapacity(this.unit, this.snapshot.areasBeforeGutter, -steppedOffset, this.snapshot.allAreasSizePixel);
+    let areasAfter = getGutterSideAbsorptionCapacity(this.unit, this.snapshot.areasAfterGutter, steppedOffset, this.snapshot.allAreasSizePixel);
+
+    // Each gutter side areas can't absorb all offset 
+    if (areasBefore.remain !== 0 && areasAfter.remain !== 0) {
+      if (Math.abs(areasBefore.remain) === Math.abs(areasAfter.remain)) {
       }
-
-      if (this.isDragging === false) {
-        return;
-      }
-
-      this.endPoint = getPointFromEvent(event);
-      if (this.endPoint === null) {
-        return;
-      }
-
-      // QuyenLS set position gutter visual
-      if (this._direction === 'horizontal') {
-        this._nGutterPos = this.endPoint.x - this._nLeftPos;
-      }
-      else {
-        this._nGutterPos = this.endPoint.y - this._nTopPos;
-      }
-
-      // Calculate steppedOffset
-
-      let offset = (this.direction === 'horizontal') ? (this.startPoint.x - this.endPoint.x) : (this.startPoint.y - this.endPoint.y);
-      if (this.dir === 'rtl') {
-        offset = -offset;
-      }
-
-      const steppedOffset = Math.round(offset / this.gutterStep) * this.gutterStep;
-
-      if (steppedOffset === this.snapshot.lastSteppedOffset) {
-        return;
-      }
-
-      this.snapshot.lastSteppedOffset = steppedOffset;
-
-      // Need to know if each gutter side areas could reacts to steppedOffset
-
-      let areasBefore = getGutterSideAbsorptionCapacity(this.unit, this.snapshot.areasBeforeGutter, -steppedOffset, this.snapshot.allAreasSizePixel);
-      let areasAfter = getGutterSideAbsorptionCapacity(this.unit, this.snapshot.areasAfterGutter, steppedOffset, this.snapshot.allAreasSizePixel);
-
-      // Each gutter side areas can't absorb all offset 
-      if (areasBefore.remain !== 0 && areasAfter.remain !== 0) {
-        if (Math.abs(areasBefore.remain) === Math.abs(areasAfter.remain)) {
-        }
-        else if (Math.abs(areasBefore.remain) > Math.abs(areasAfter.remain)) {
-          areasAfter = getGutterSideAbsorptionCapacity(this.unit, this.snapshot.areasAfterGutter, steppedOffset + areasBefore.remain, this.snapshot.allAreasSizePixel);
-        }
-        else {
-          areasBefore = getGutterSideAbsorptionCapacity(this.unit, this.snapshot.areasBeforeGutter, -(steppedOffset - areasAfter.remain), this.snapshot.allAreasSizePixel);
-        }
-      }
-      // Areas before gutter can't absorbs all offset > need to recalculate sizes for areas after gutter.
-      else if (areasBefore.remain !== 0) {
+      else if (Math.abs(areasBefore.remain) > Math.abs(areasAfter.remain)) {
         areasAfter = getGutterSideAbsorptionCapacity(this.unit, this.snapshot.areasAfterGutter, steppedOffset + areasBefore.remain, this.snapshot.allAreasSizePixel);
       }
-      // Areas after gutter can't absorbs all offset > need to recalculate sizes for areas before gutter.
-      else if (areasAfter.remain !== 0) {
+      else {
         areasBefore = getGutterSideAbsorptionCapacity(this.unit, this.snapshot.areasBeforeGutter, -(steppedOffset - areasAfter.remain), this.snapshot.allAreasSizePixel);
       }
-
-      if (this.unit === 'percent') {
-        // Hack because of browser messing up with sizes using calc(X% - Ypx) -> el.getBoundingClientRect()
-        // If not there, playing with gutters makes total going down to 99.99875% then 99.99286%, 99.98986%,..
-        const all = [...areasBefore.list, ...areasAfter.list];
-        const areaToReset = all.find(a => a.percentAfterAbsorption !== 0 && a.percentAfterAbsorption !== a.areaSnapshot.area.minSize && a.percentAfterAbsorption !== a.areaSnapshot.area.maxSize)
-
-        if (areaToReset) {
-          areaToReset.percentAfterAbsorption = this.snapshot.allInvolvedAreasSizePercent - all.filter(a => a !== areaToReset).reduce((total, a) => total + a.percentAfterAbsorption, 0);
-        }
-      }
-
-      // Now we know areas could absorb steppedOffset, time to really update sizes
-
-      areasBefore.list.forEach(item => updateAreaSize(this.unit, item));
-      areasAfter.list.forEach(item => updateAreaSize(this.unit, item));
-
-      // If isRefreshStyleDragging = true then refresh style document when dragging
-      if (this._isRefreshStyle) {
-        this.refreshStyleSizes();
-      }
-
-      this.notify('progress', this.snapshot.gutterNum);
     }
+    // Areas before gutter can't absorbs all offset > need to recalculate sizes for areas after gutter.
+    else if (areasBefore.remain !== 0) {
+      areasAfter = getGutterSideAbsorptionCapacity(this.unit, this.snapshot.areasAfterGutter, steppedOffset + areasBefore.remain, this.snapshot.allAreasSizePixel);
+    }
+    // Areas after gutter can't absorbs all offset > need to recalculate sizes for areas before gutter.
+    else if (areasAfter.remain !== 0) {
+      areasBefore = getGutterSideAbsorptionCapacity(this.unit, this.snapshot.areasBeforeGutter, -(steppedOffset - areasAfter.remain), this.snapshot.allAreasSizePixel);
+    }
+
+    if (this.unit === 'percent') {
+      // Hack because of browser messing up with sizes using calc(X% - Ypx) -> el.getBoundingClientRect()
+      // If not there, playing with gutters makes total going down to 99.99875% then 99.99286%, 99.98986%,..
+      const all = [...areasBefore.list, ...areasAfter.list];
+      const areaToReset = all.find(a => a.percentAfterAbsorption !== 0 && a.percentAfterAbsorption !== a.areaSnapshot.area.minSize && a.percentAfterAbsorption !== a.areaSnapshot.area.maxSize)
+
+      if (areaToReset) {
+        areaToReset.percentAfterAbsorption = this.snapshot.allInvolvedAreasSizePercent - all.filter(a => a !== areaToReset).reduce((total, a) => total + a.percentAfterAbsorption, 0);
+      }
+    }
+
+    // Now we know areas could absorb steppedOffset, time to really update sizes
+
+    areasBefore.list.forEach(item => updateAreaSize(this.unit, item));
+    areasAfter.list.forEach(item => updateAreaSize(this.unit, item));
+
+    // If isRefreshStyleDragging = true then refresh style document when dragging
+    if (this._isRefreshStyle) {
+      this.refreshStyleSizes();
+    }
+
+    this.notify('progress', this.snapshot.gutterNum);
+    // }
   }
 
   protected stopDragging(event?: Event): void {
@@ -414,6 +424,8 @@ export class BravoSplitComponent extends SplitComponent {
       event.preventDefault();
       event.stopPropagation();
     }
+
+    this._bIsHidden = true;
 
     // If isRefreshStyleDragging = false then refresh style document after drag.
     if (!this._isRefreshStyle) {
